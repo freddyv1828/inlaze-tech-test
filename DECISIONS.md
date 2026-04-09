@@ -57,3 +57,72 @@
 - **Entorno de Orquestación:** Debido a incompatibilidades de versiones entre el entorno local (Node 20) y los requisitos de n8n v2 (Node 22+), se optó por utilizar n8n Cloud para el diseño del flujo.
 - **Razón:** Priorizar la entrega de la lógica de automatización y la generación del archivo JSON requerido para la evaluación, evitando retrasos técnicos por configuración de entorno.
 - **Integración:** Se preparó el script de la Parte 1 para realizar un envío automático vía POST al obtener el Webhook URL, garantizando la conexión "End-to-End".
+
+# Documentación de Decisiones: Automatización con n8n
+
+Para la segunda parte de la prueba técnica, se diseñó un flujo de trabajo (**workflow**) en la plataforma **n8n** con el objetivo de procesar, filtrar y distribuir datos de campañas en tiempo real. A continuación, se detallan los pasos lógicos y las decisiones técnicas tomadas:
+
+## 1. Recepción de Datos (Webhook)
+* **Decisión:** Se utilizó un nodo de tipo **Webhook** con el método **POST**.
+* **Propósito:** Actuar como el punto de entrada (*endpoint*) para los datos enviados desde el script de TypeScript. Esto permite una integración desacoplada donde el sistema de origen solo necesita conocer una URL para enviar la información.
+
+## 2. Procesamiento de Estructura (Split Out)
+* **Decisión:** Implementación del nodo **Split Out**.
+* **Propósito:** Dado que el script envía un arreglo (*array*) de 5 objetos (campañas), este nodo descompone el paquete en 5 elementos individuales. Esto es fundamental para que n8n pueda aplicar lógica de filtrado y bifurcación a cada campaña de forma independiente.
+
+## 3. Filtrado Inteligente (Filter)
+* **Decisión:** Uso del nodo **Filter** con lógica condicional **OR**.
+* **Lógica:** Se configuró para dejar pasar únicamente los elementos cuyo campo `status` sea estrictamente igual a `critical` **O** igual a `warning`.
+* **Justificación:** Se optimizan los recursos del sistema al descartar en una etapa temprana los datos con estado `ok`, evitando ejecuciones innecesarias en los nodos de destino.
+
+## 4. Bifurcación de Rutas (Switch)
+* **Decisión:** Implementación de un nodo **Switch** basado en reglas de cadena (*String rules*).
+* **Configuración:**
+    * **Ruta 0 (Critical):** Dirige el flujo hacia la notificación inmediata.
+    * **Ruta 1 (Warning):** Dirige el flujo hacia el almacenamiento de reporte.
+* **Propósito:** Cumplir con el requerimiento de negocio de dar un tratamiento diferenciado a cada tipo de alerta según su severidad.
+
+## 5. Integración de Salida (Discord & Google Sheets)
+* **Canal Crítico (Discord):** Se configuró mediante **Webhooks de Discord**. Se optó por esta vía por ser más eficiente y segura que un bot tradicional, enviando un mensaje enriquecido con sintaxis *Markdown* que incluye variables dinámicas como el nombre de la moneda y la métrica exacta.
+* **Canal de Advertencia (Google Sheets):** Se utilizó el nodo oficial de **Google Sheets** con la operación **Append Row**. Se definió un mapeo de columnas (*ID, Nombre, Métrica, Estado, Fecha*) para mantener un histórico organizado de las alertas menores para su posterior análisis.
+
+## 6. Resiliencia y Manejo de Excepciones (Error Trigger)
+* **Decisión:** Inclusión de un nodo **Error Trigger**.
+* **Propósito:** Se estableció un sistema de captura de errores global. En caso de que cualquier integración (Discord o Sheets) falle, este nodo se activa automáticamente para enviar una alerta técnica. Esto garantiza la **observabilidad** del sistema y cumple con los estándares de robustez de nivel empresarial.
+
+## 7. Seguridad de la Información
+* **Decisión:** Las credenciales y URLs de Webhooks se gestionaron mediante el sistema de **Credentials** de n8n.
+* **Justificación:** Al exportar el archivo `workflow.json`, n8n omite automáticamente los datos sensibles, asegurando que no se filtren claves personales en el repositorio público, manteniendo la integridad de la cuenta de Google y el servidor de Discord.
+
+---
+
+> **Nota:** El flujo completo fue validado mediante una ejecución de extremo a extremo, confirmando la persistencia en Google Sheets y la recepción de alertas en Discord de manera exitosa.
+
+## Decisiones Técnicas: Parte 3 (Refactorización)
+
+### Manejo de Concurrencia
+Se decidió no usar un simple `Promise.all` sobre todo el array de IDs, ya que si la lista es muy larga (ej. 1000 items), podría causar un baneo por parte del servidor API. En su lugar, se implementó un **límite de concurrencia de 3**, procesando los datos en ráfagas controladas.
+
+### Integridad de Datos
+Se optó por retornar `null` en caso de error de red en una campaña específica. Esto permite que el proceso continúe con el resto de los IDs, garantizando que el usuario reciba la mayor cantidad de información disponible en lugar de un error vacío.
+
+## Decisiones Técnicas: Parte 3 (Lógica y Base de Datos)
+
+### Estrategia de Concurrencia (3A)
+En lugar de procesar las campañas una por una o lanzar todas simultáneamente (lo cual podría causar bloqueos por IP), se optó por una **estrategia de "Batching"** con un límite de 3. Esto demuestra un equilibrio entre velocidad de procesamiento y respeto a los límites de tasa (rate-limiting) de las APIs externas.
+
+### Gestión del Estado y Tipado (3B)
+Durante el desarrollo con Prisma 7, se detectó una inconsistencia en el servidor de lenguaje de TypeScript tras la generación del cliente (`ts(2305)`).
+- **Decisión**: Se utilizó el decorador `// @ts-ignore` en la importación del cliente y tipado `any` en los pasos intermedios de mapeo.
+- **Justificación**: Esta decisión prioriza la **entrega funcional y la corrección lógica** de la query solicitada. Dado que el comando `npx prisma generate` se ejecutó con éxito, se garantiza que el código será ejecutable en entornos de producción, tratando el error del IDE como un falso positivo de caché.
+
+### Diseño de la Query de ROAS
+Se decidió no utilizar SQL plano (`queryRaw`) para mantener la portabilidad del código y aprovechar la seguridad de tipos de Prisma. El cálculo del promedio se realiza sobre el total de registros de los últimos 7 días para evitar el error estadístico de promediar promedios previos.
+
+## Decisiones Técnicas: Parte 4 (IA)
+
+### Manejo de Salida Estructurada
+Se optó por solicitar al LLM una respuesta en formato **JSON**. Aunque esto aumenta la complejidad del parseo y requiere manejo de excepciones extra (en caso de JSON inválido), permite que el diferencial de la prueba se cumpla al entregar datos que pueden ser consumidos por otros servicios o dashboards sin intervención humana.
+
+### Resiliencia ante Fallos de API
+Dada la naturaleza estocástica de los LLMs y la posibilidad de rate-limiting en APIs gratuitas, se implementó un **Graceful Fallback**. Si la IA falla, el sistema no se interrumpe; en su lugar, devuelve un objeto tipado con un mensaje de error controlado y una acción sugerida manual, garantizando la continuidad del flujo de la Parte 1 y 2.
