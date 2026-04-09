@@ -1,0 +1,368 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "campañas-inlaze",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "5172eb4d-c9bc-4ab1-a654-e011de346bbb",
+      "name": "Webhook",
+      "webhookId": "b342c197-ee10-43d5-a535-ad65a97e925a"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -64
+      ],
+      "id": "3b124e53-1c4e-4e48-9de3-683f67181d7f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "63f72be1-0b8f-4d42-8c56-d5637937b8b3",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "critical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "ee14ac2f-b778-454e-9710-aa46714c5d51",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "warning",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        -144
+      ],
+      "id": "ff766dd3-9dcf-420c-9a5b-88db4f8a7c36",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "critical",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "01001c6c-5977-41c4-9d49-430c43271dd4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ruta Crítica"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a650e17b-4482-4ce3-a8a1-edef743714a7",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "warning",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ruta Warning"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "a8548efe-8fbf-452f-b944-f4f6e2c72785",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🚨 **ALERTA CRÍTICA DETECTADA** 🚨\n\nSe ha identificado un problema en la campaña: **{{ $json.name }}**\n📉 **Métrica:** {{ $json.metric }}\n🔴 **Estado:** {{ $json.status }}\n📅 **Fecha de evaluación:** {{ $json.evaluatedAt }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -144
+      ],
+      "id": "a9d741db-422a-472f-9ead-8bd344e23efa",
+      "name": "Discord",
+      "webhookId": "5aa526d7-dd7a-4a84-91ec-b7ba2986d2ce",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "5G19oHLwA6bH5l48",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hVcI1DkFME0jYqPPXgprfMTn9sIQNfTod39ih1_uQn8",
+          "mode": "list",
+          "cachedResultName": "Reporte_Campañas_Inlaze",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hVcI1DkFME0jYqPPXgprfMTn9sIQNfTod39ih1_uQn8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hVcI1DkFME0jYqPPXgprfMTn9sIQNfTod39ih1_uQn8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.id }}",
+            "Nombre": "={{ $json.name }}",
+            "Metrica": "={{ $json.metric }}",
+            "Estado": "={{ $json.status }}",
+            "Fecha": "={{ $json.evaluatedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Metrica",
+              "displayName": "Metrica",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        32
+      ],
+      "id": "e0e2cbc1-035a-4d5f-ad2d-1f8fde867eb6",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZZwFKyRct2jH9iEg",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        192
+      ],
+      "id": "39d7fca2-d8c7-4886-a212-34372e17c78b",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "**FALLO EN EL SISTEMA**\nEl flujo de automatización ha detectado un error crítico y se ha detenido.\nFavor de revisar los logs en n8n inmediatamente.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        416,
+        192
+      ],
+      "id": "0846e4f7-b531-4cd7-9f5c-0ea661ac994f",
+      "name": "Discord1",
+      "webhookId": "d6b5adcf-d314-4fd2-902e-7b5910a16454",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "5G19oHLwA6bH5l48",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Discord1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a086cb12-749d-4a87-ab2d-cc6322a07e23",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3eabf9747d7f15bfd996027a09b3543ade908a8e156fd0edd4213cb8fd919484"
+  },
+  "id": "NfVkaWgyydsjyPNS",
+  "tags": []
+}

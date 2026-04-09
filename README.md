@@ -31,3 +31,14 @@ EXTERNAL_API_URL=[https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd
 * `src/part1/Types/`: Definición de interfaces y contratos de datos (Type Safety).
 * `src/part1/utils/`: Utilidades lógicas y algoritmos de resiliencia (Backoff Exponencial).
 * `campaign_results.json`: Salida procesada y clasificada para la integración con **n8n**.
+
+## 🚀 Prueba Técnica - Automatización n8n
+
+### Implementación
+- **Flujo Principal**: Recibe datos de campañas vía Webhook, los procesa y filtra.
+- **Bifurcación**: Los estados `critical` se notifican por Discord y los `warning` se registran en Google Sheets.
+- **Manejo de Errores**: Se implementó un `Error Trigger` global que notifica fallos en el sistema vía Discord.
+
+### Evidencias
+- [https://drive.google.com/drive/folders/1lNIfG70wiL5VZf82hdd9fn-yt0mOyqAC?usp=sharing] 
+- El archivo `workflow.json` se encuentra en la raíz para su inspección.

@@ -2,36 +2,36 @@
   {
     "id": "bitcoin",
     "name": "Bitcoin",
-    "metric": 4.14,
-    "status": "ok",
-    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+    "metric": 2.31,
+    "status": "warning",
+    "evaluatedAt": "2026-04-09T10:43:11.800Z"
   },
   {
     "id": "ethereum",
     "name": "Ethereum",
-    "metric": 2.9,
+    "metric": 4.48,
     "status": "ok",
-    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+    "evaluatedAt": "2026-04-09T10:43:11.800Z"
   },
   {
     "id": "tether",
     "name": "Tether",
-    "metric": 2.4,
-    "status": "warning",
-    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+    "metric": 0.41,
+    "status": "critical",
+    "evaluatedAt": "2026-04-09T10:43:11.800Z"
   },
   {
     "id": "binancecoin",
     "name": "BNB",
-    "metric": 3.49,
-    "status": "ok",
-    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+    "metric": 2.07,
+    "status": "warning",
+    "evaluatedAt": "2026-04-09T10:43:11.800Z"
   },
   {
     "id": "ripple",
     "name": "XRP",
-    "metric": 0.89,
-    "status": "critical",
-    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+    "metric": 4.13,
+    "status": "ok",
+    "evaluatedAt": "2026-04-09T10:43:11.800Z"
   }
 ]

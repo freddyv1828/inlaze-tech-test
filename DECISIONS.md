@@ -40,3 +40,20 @@
 
 - **Arquitectura Modular:** Se optó por separar los tipos y las utilidades del núcleo del script (`index.ts`). 
 - **Justificación:** Esta estructura permite que el sistema crezca. Si en el futuro se añaden más APIs o métricas, solo se deben crear nuevos archivos en `Types/` o `utils/` sin comprometer la estabilidad del orquestador principal.
+
+## Gestión de Versiones y Control de Cambios
+
+- **Estrategia de Commits:** Se realizó el primer push tras completar la Parte 1.
+- **Razón:** Seguir la metodología de "Atomic Commits" (commits atómicos), asegurando que cada entrega en el repositorio sea una versión estable y funcional del sistema. Esto facilita el rollback y la auditoría de código en fases posteriores.
+
+## Análisis de Extensibilidad (Escalabilidad de Fuentes)
+
+- **Desacoplamiento de Datos:** El núcleo del monitor procesa objetos que cumplen con el contrato `CampaignReport`. 
+- **Adaptabilidad:** Si se requiere integrar una nueva fuente (ej. Google Ads, Facebook API), solo es necesario crear un nuevo "Adaptador" o función de mapeo que transforme los datos de esa API al tipo `CampaignReport`.
+- **Resultado:** El núcleo del script (`index.ts`) y el flujo de salida hacia n8n permanecen intactos, cumpliendo con el principio de Open/Closed (Abierto para extensión, cerrado para modificación).
+
+## Pivotaje de Infraestructura (n8n)
+
+- **Entorno de Orquestación:** Debido a incompatibilidades de versiones entre el entorno local (Node 20) y los requisitos de n8n v2 (Node 22+), se optó por utilizar n8n Cloud para el diseño del flujo.
+- **Razón:** Priorizar la entrega de la lógica de automatización y la generación del archivo JSON requerido para la evaluación, evitando retrasos técnicos por configuración de entorno.
+- **Integración:** Se preparó el script de la Parte 1 para realizar un envío automático vía POST al obtener el Webhook URL, garantizando la conexión "End-to-End".
