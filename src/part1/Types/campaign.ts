@@ -2,7 +2,7 @@
  * Estructura par iGaming metrica = ROAS
  */
 
-export type CampaingReport = {
+export type CampaignReport = {
     id: string;                  // Identificador inico de la campaña
     name: string;                // Nombre de la campaña
     metric: number;              // Roas

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "bitcoin",
+    "name": "Bitcoin",
+    "metric": 4.14,
+    "status": "ok",
+    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+  },
+  {
+    "id": "ethereum",
+    "name": "Ethereum",
+    "metric": 2.9,
+    "status": "ok",
+    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+  },
+  {
+    "id": "tether",
+    "name": "Tether",
+    "metric": 2.4,
+    "status": "warning",
+    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+  },
+  {
+    "id": "binancecoin",
+    "name": "BNB",
+    "metric": 3.49,
+    "status": "ok",
+    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+  },
+  {
+    "id": "ripple",
+    "name": "XRP",
+    "metric": 0.89,
+    "status": "critical",
+    "evaluatedAt": "2026-04-09T07:51:53.714Z"
+  }
+]
